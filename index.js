@@ -2,6 +2,7 @@
 // require the express npm module, needs to be added to the project using "yarn add" or "npm install"
 const express = require("express");
 
+const db = require("./data/db.js");
 // creates an express application using the express module
 const server = express();
 
@@ -14,20 +15,49 @@ server.get("/", (req, res) => {
   res.send("Hello World");
 });
 
-const hobbits = [
-  {
-    id: 1,
-    name: "Samwise Gamgee"
-  },
-  {
-    id: 2,
-    name: "Frodo Baggins"
-  }
-];
-
 server.get("/hobbits", (req, res) => {
   // route handler code here
+  const hobbits = [
+    {
+      id: 1,
+      name: "Samwise Gamgee"
+    },
+    {
+      id: 2,
+      name: "Frodo Baggins"
+    }
+  ];
   res.status(200).json(hobbits);
+});
+
+server.get("/api/users", (req, res) => {
+  db.find()
+    .then(users => {
+      res.status(200).json(users);
+    })
+    .catch(err => {
+      res
+        .status(500)
+        .json({ message: "we failed you, can't get the users", error: err });
+    });
+});
+
+server.get("/api/users/:id", (req, res) => {
+  const { id } = req.params;
+
+  db.findById(id)
+    .then(user => {
+      if (user) {
+        res.status(200).json(user);
+      } else {
+        res.status(404).json({ message: "user not found" });
+      }
+    })
+    .catch(err => {
+      res
+        .status(500)
+        .json({ message: "we failed you, can't get the user", error: err });
+    });
 });
 
 // once the server is fully configured we can have it "listen" for connections on a particular "port"
